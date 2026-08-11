@@ -1,5 +1,6 @@
 [project]
 name = "FInfo"
+version = "1.0.0"
 description = "Lightweight Python CLI script to quickly retrieve and inspect detailed information for files and folders."
 requires-python = ">=3.12.0"
 dependencies = []
