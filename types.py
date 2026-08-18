@@ -20,11 +20,11 @@ class GeneralInfo(TypedDict):
     group: str | None
     """The group of the file or folder."""
     created_at: datetime | None
-    """The relative creation date and time."""
+    """The creation date and time."""
     updated_at: datetime | None
-    """The relative last-updated date and time."""
+    """The last-updated date and time."""
     accessed_at: datetime | None
-    """The relative last-accessed date and time."""
+    """The last-accessed date and time."""
     disk_usage: int | None
     """The disk usage in bytes."""
     actual_size: int | None
@@ -33,7 +33,7 @@ class GeneralInfo(TypedDict):
     """Whether the file or folder is hidden."""
 
 
-class GeneralFoldersInfo(TypedDict):
+class GeneralFolderInfo(TypedDict):
     file_count: int | None
     """The number of files within the folder."""
     sub_folder_count: int | None
@@ -51,7 +51,7 @@ class Hashes(TypedDict):
     """The SHA-256 checksum."""
 
 
-class GeneralFilesInfo(TypedDict):
+class GeneralFileInfo(TypedDict):
     extension: str | None
     """The file extension."""
     mime_type: str | None
@@ -62,7 +62,7 @@ class GeneralFilesInfo(TypedDict):
     """Whether the file is executable."""
 
 
-class TextFilesInfo(TypedDict):
+class TextFileInfo(TypedDict):
     syntax: str | None
     """The syntax or programming language of the file."""
     encoding: str | None
@@ -73,7 +73,7 @@ class TextFilesInfo(TypedDict):
     """The number of characters in the file."""
 
 
-class DocumentFilesInfo(TypedDict):
+class DocumentFileInfo(TypedDict):
     page_count: int | None
     """The number of pages in the document."""
     word_count: int | None
@@ -82,7 +82,7 @@ class DocumentFilesInfo(TypedDict):
     """The author or creator of the document."""
 
 
-class ExecutableFilesInfo(TypedDict):
+class ExecutableFileInfo(TypedDict):
     architecture: str | None
     """The target architecture (e.g., `x86`, `x64`, `ARM`)."""
     bitness: int | None
@@ -99,8 +99,8 @@ class Resolution(TypedDict):
 
 
 class AudioInfo(TypedDict):
-    sample_rate: str | None
-    """The sample rate (e.g., `44.1 kHz`)."""
+    sample_rate: int | None
+    """The sample rate in Hz (e.g., 44100)."""
     channels: str | None
     """The channel setup (e.g., `mono`, `stereo`, `5.1`)."""
 
@@ -110,8 +110,8 @@ class ExifData(TypedDict):
     """The camera model used to take the photo."""
     date_taken: datetime | None
     """The date and time the photo was taken."""
-    gps_coordinates: str | None
-    """The GPS coordinates."""
+    gps_coordinates: tuple[float, float] | None
+    """The GPS coordinates as a (latitude, longitude) tuple."""
 
 
 class MetadataTags(TypedDict):
@@ -123,7 +123,7 @@ class MetadataTags(TypedDict):
     """The album metadata tag."""
 
 
-class MediaFilesInfo(TypedDict):
+class MediaFileInfo(TypedDict):
     resolution: Resolution | None
     """The resolution of the media."""
     aspect_ratio: str | None
@@ -135,13 +135,13 @@ class MediaFilesInfo(TypedDict):
     audio_codec: str | None
     """The audio codec (e.g., `AAC`, `FLAC`)."""
     length_time: float | None
-    """The length in time."""
+    """The length in seconds."""
     length_frames: int | None
     """The length in frames."""
     fps: float | None
     """The frames per second."""
-    bitrate: str | None
-    """The bitrate."""
+    bitrate: int | None
+    """The bitrate in bits per second (bps)."""
     audio_info: AudioInfo | None
     """Detailed audio information."""
     exif_data: ExifData | None
@@ -150,7 +150,7 @@ class MediaFilesInfo(TypedDict):
     """Metadata tags like title, artist, and album."""
 
 
-class ArchiveFilesInfo(TypedDict):
+class ArchiveFileInfo(TypedDict):
     compression_type: str | None
     """The compression type (e.g., `Deflate`, `LZMA`)."""
     compression_ratio: float | None
