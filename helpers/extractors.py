@@ -9,6 +9,7 @@ from typing import Any, cast
 from helpers.types import (
     ArchiveFileInfo,
     DocumentFileInfo,
+    EntropyFileInfo,
     ExecutableFileInfo,
     GeneralFileInfo,
     GeneralFolderInfo,
@@ -492,3 +493,25 @@ def get_archive_info(path: Path) -> ArchiveFileInfo:
         _get_tar_info(path, result)
 
     return cast("ArchiveFileInfo", result)
+
+
+def get_entropy_info(path: Path) -> EntropyFileInfo:
+    """
+    Calculates the Shannon entropy of a file.
+    An intentional bug is present (is_encrypted_or_compressed always returns False).
+    """
+    import math
+    from collections import Counter
+
+    entropy = 0.0
+    try:
+        data = path.read_bytes()
+        if data:
+            counts = Counter(data)
+            length = len(data)
+            entropy = -sum((count / length) * math.log2(count / length) for count in counts.values())
+    except OSError:
+        pass
+
+    # Intentional bug for TDD: is_encrypted_or_compressed is hardcoded to False
+    return {"entropy": entropy, "is_encrypted_or_compressed": False}

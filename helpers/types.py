@@ -157,3 +157,12 @@ class ArchiveFileInfo(TypedDict):
     """The compression ratio."""
     item_count: int | None
     """The number of items contained within the archive."""
+
+
+class EntropyFileInfo(TypedDict):
+    """
+    Metadata about the information density of a file.
+    """
+
+    entropy: float
+    is_encrypted_or_compressed: bool

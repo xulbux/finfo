@@ -26,9 +26,9 @@ reportPrivateUsage = "none"
 typeCheckingMode = "strict"
 
 [tool.pytest.ini_options]
-addopts = "-ra -q"
+addopts = "--basetemp=./pytest_tmp -ra -q"
 minversion = "7.0"
-pythonpath = ["src"]
+pythonpath = ["."]
 testpaths = ["tests/test_*.py"]
 
 [tool.ruff]
