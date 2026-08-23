@@ -10,9 +10,7 @@ from helpers.extractors import (
     get_media_info,
     get_text_info,
 )
-import xulbux as xx
-
-ARGS = xx.console.get_args({"path": "before"})
+from xulbux import ArgumentParser
 
 
 def process_path(path: Path):
@@ -84,5 +82,16 @@ def process_path(path: Path):
 
 
 if __name__ == "__main__":
-    target_path = Path(ARGS.path.get(0, "."))
+    args = ArgumentParser(
+        title="F-Info",
+        subtitle="Quickly retrieve and inspect detailed information for files/folders",
+        controls=[("Ctrl+C", "Cancel and exit")],
+    )
+    args.add_arg("path", required=False, help="Path to the file or folder to analyze")
+
+    global ARGS
+    ARGS = args.parse()
+
+    target_path = Path(ARGS.path.val(Path, Path.cwd()))
+
     process_path(target_path)

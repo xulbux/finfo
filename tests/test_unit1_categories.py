@@ -7,34 +7,37 @@ from helpers.extractors import get_file_info, get_folder_info
 
 class TestCategory1:
     """
-    LB1: Unit Test 1 - Test Categories 1-4
+    **LB1:** Unit Test 1 – Test Categories 1-4<br>
+    **Topics:** Error Handling, Regex, Combinatorial Logic, Collections
     """
 
     def test_error_handling_edge_cases(self) -> None:
         """
-        Category: Error Handling & Edge Cases
-        Focus: Targeted interception of exceptions and invalid values.
-
-        Scenario: File does not exist. get_file_info() should not crash,
-        but catch the OSError and set hashes to None.
+        **Topic:** Error Handling & Edge Cases<br>
+        **Focus:** Targeted interception of exceptions and invalid values.\n
+        ----------------------------------------------------------------------------------------------------
+        File does not exist.<br>
+        `get_file_info()` should not crash, but catch the OSError and set hashes to None.
         """
+
         missing_path = Path("this_file_does_not_exist_12345.xyz")
 
-        # Test runs without raising an exception despite the file missing
+        # Test runs without raising exception despite the file missing:
         result = get_file_info(missing_path)
 
-        # Verify that the exception handler worked
+        # Verify exception handler worked:
         assert result["hashes"] is None
         assert result["is_executable"] is False
 
     def test_format_pattern_regex(self, tmp_path: Path) -> None:
         """
-        Category: Format & Pattern (Regex)
-        Focus: String validation via patterns.
-
-        Scenario: A real file is hashed. The return values must exactly
-        match the Regex for MD5, SHA1 and SHA256 (hex strings of correct length).
+        **Topic:** Format & Pattern (Regex)<br>
+        **Focus:** String validation via patterns.\n
+        ----------------------------------------------------------------------------------------------------
+        A real file is hashed. The return values must exactly match<br>
+        the Regex for MD5, SHA1 and SHA256 (hex strings of correct length).
         """
+
         test_file = tmp_path / "test.txt"
         test_file.write_text("Hello World")
 
@@ -46,56 +49,57 @@ class TestCategory1:
         assert hashes["sha1"] is not None
         assert hashes["sha256"] is not None
 
-        # MD5: 32 hex chars
+        # [MD5] 32 hex chars:
         assert re.match(r"^[a-f0-9]{32}$", hashes["md5"]), "MD5 matched not the expected regex pattern"
-        # SHA1: 40 hex chars
+        # [SHA1] 40 hex chars:
         assert re.match(r"^[a-f0-9]{40}$", hashes["sha1"]), "SHA1 matched not the expected regex pattern"
-        # SHA256: 64 hex chars
+        # [SHA256] 64 hex chars:
         assert re.match(r"^[a-f0-9]{64}$", hashes["sha256"]), "SHA256 matched not the expected regex pattern"
 
     def test_combinatorial_logic(self) -> None:
         """
-        Category: Combinatorial Logic
-        Focus: Linked conditions and decision tables.
-
-        Scenario: format_relative_time has several if/elif conditions
-        based on delta.days. We check the different branches.
+        **Topic:** Combinatorial Logic<br>
+        **Focus:** Linked conditions and decision tables.\n
+        ----------------------------------------------------------------------------------------------------
+        `format_relative_time` has several if/elif conditions based on `delta.days`.<br>
+        We check the different branches.
         """
+
         ref_time = datetime(2026, 8, 18, 12, 0, 0)
 
-        # Case 1: days == 0 (Today)
+        # [1] days == 0 (today):
         dt_today = datetime(2026, 8, 18, 10, 30, 0)
         assert format_relative_time(dt_today, reference_time=ref_time) == "at 10:30, today"
 
-        # Case 2: days == 1 (Yesterday)
+        # [2] days == 1 (yesterday):
         dt_yesterday = datetime(2026, 8, 17, 9, 15, 0)
         assert format_relative_time(dt_yesterday, reference_time=ref_time) == "at 09:15, yesterday"
 
-        # Case 3: days > 1 (Past)
+        # [3] days > 1 (past):
         dt_past = datetime(2026, 8, 15, 8, 0, 0)
         assert format_relative_time(dt_past, reference_time=ref_time) == "at 08:00, 3 days ago"
 
-        # Case 4: negative days (Tomorrow)
+        # [4] negative days (tomorrow):
         dt_tomorrow = datetime(2026, 8, 19, 10, 0, 0)
         assert format_relative_time(dt_tomorrow, reference_time=ref_time) == "at 10:00, tomorrow"
 
     def test_collections_lists(self, tmp_path: Path) -> None:
         """
-        Category: Collections & Lists
-        Focus: Testing arrays/lists (here: Directory Tree Walking).
-
-        Scenario: We build a nested folder structure with files.
-        get_folder_info iterates through this and aggregates metadata.
+        **Topic:** Collections & Lists<br>
+        **Focus:** Testing arrays/lists (here: directory tree walking).\n
+        ----------------------------------------------------------------------------------------------------
+        We build a nested folder structure with files.<br>
+        `get_folder_info` iterates through this and aggregates metadata.
         """
-        # Structure:
+
         # tmp_path/
-        # ├── file1.txt
-        # ├── sub1/
-        # │   ├── file2.txt
-        # │   └── file3.txt
-        # └── sub2/
-        #     └── sub3/
-        #         └── file4.txt
+        # ├─ file1.txt
+        # ├─ sub1/
+        # │  ├─ file2.txt
+        # │  └─ file3.txt
+        # └─ sub2/
+        #    └─ sub3/
+        #       └─ file4.txt
 
         (tmp_path / "file1.txt").touch()
 
@@ -113,9 +117,9 @@ class TestCategory1:
 
         info = get_folder_info(tmp_path)
 
-        # 4 files
+        # 4 files:
         assert info["file_count"] == 4
-        # 3 subfolders (sub1, sub2, sub3)
+        # 3 subfolders:
         assert info["sub_folder_count"] == 3
-        # max_depth is 2 (sub2 -> sub3)
+        # Max depth is 2 (sub2/sub3):
         assert info["max_depth"] == 2

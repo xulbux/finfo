@@ -1,7 +1,28 @@
 
-# FInfo
+# F-Info
 
-#### GENERAL
+<br>
+
+## Dependency Installation
+
+If you're on a Linux or macOS system, first create a virtual environment and activate it:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Then, install the required dependencies:
+
+```bash
+python install_deps.py
+```
+
+<br>
+
+## Information Categories
+
+#### General
 
 *   Absolute path
 *   Permissions (human-readable: `rwxr-xr-x` and octal: `755`)
@@ -12,39 +33,39 @@
 *   Disk usage vs. actual size
 *   Hidden status
 
-#### GENERAL FOLDERS
+#### General Folders
 
 *   File count
 *   Sub-folder count
 *   Max depth
 
-#### GENERAL FILES
+#### General Files
 
 *   Extension
 *   Type / mime type
 *   Hashes / checksums
 *   Executable status
 
-#### TEXT FILES
+#### Text Files
 
 *   Syntax / language
 *   Encoding
 *   Line count
 *   Char count
 
-#### DOCUMENT FILES
+#### Document Files
 
 *   Page count
 *   Word count
 *   Author / creator
 
-#### EXECUTABLE FILES
+#### Executable Files
 
 *   Architecture (`x86`, `x64`, `ARM`, …)
 *   Bitness (`32-bit`, `64-bit`)
 *   Signed status
 
-#### MEDIA FILES
+#### Media Files
 
 *   Resolution
 *   Aspect ratio
@@ -57,7 +78,7 @@
 *   EXIF Data (camera model, date taken, GPS coordinates)
 *   Metadata tags (title, artist, album, …)
 
-#### ARCHIVE FILES
+#### Archive Files
 
 *   Compression type (`Deflate`, `LZMA`, …)
 *   Compression ratio

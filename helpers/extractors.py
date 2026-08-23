@@ -1,8 +1,10 @@
 import hashlib
+import math
 import mimetypes
 import os
 import stat
 import sys
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Any, cast
@@ -496,22 +498,21 @@ def get_archive_info(path: Path) -> ArchiveFileInfo:
 
 
 def get_entropy_info(path: Path) -> EntropyFileInfo:
-    """
-    Calculates the Shannon entropy of a file.
-    An intentional bug is present (is_encrypted_or_compressed always returns False).
-    """
-    import math
-    from collections import Counter
+    """Calculates the Shannon entropy of a file.\n
+    ------------------------------------------------------------------------------------------
+    `is_encrypted_or_compressed` always returns `False` as an intentional bug for TDD."""
 
-    entropy = 0.0
+    entropy: float = 0.0
+
     try:
-        data = path.read_bytes()
-        if data:
-            counts = Counter(data)
+        if data := path.read_bytes():
             length = len(data)
-            entropy = -sum((count / length) * math.log2(count / length) for count in counts.values())
+            entropy = -sum((count / length) * math.log2(count / length) for count in Counter(data).values())
+
     except OSError:
         pass
 
-    # Intentional bug for TDD: is_encrypted_or_compressed is hardcoded to False
-    return {"entropy": entropy, "is_encrypted_or_compressed": False}
+    return {
+        "entropy": entropy,
+        "is_encrypted_or_compressed": False,  # Hardcoded to `False` for TDD purposes.
+    }
