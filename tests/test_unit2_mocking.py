@@ -66,3 +66,43 @@ class TestCategory2:
         assert group == "BUILTIN\\Users"
         assert mock_win32.GetFileSecurity.called
         assert mock_win32.LookupAccountSid.call_count == 2
+
+    def test_mocking_posix_fallback(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Advanced Mocking (POSIX Fallback)<br>
+        **Focus:** Verifying cross-platform fallback logic for Linux/macOS.\n
+        ----------------------------------------------------------------------------------------------------
+        We simulate a POSIX platform (linux) where `path.owner()` and `path.group()` are used.
+        """
+
+        test_file = tmp_path / "posix_test.txt"
+        test_file.touch()
+
+        monkeypatch.setattr("sys.platform", "linux")
+        monkeypatch.setattr(Path, "owner", lambda self: "testuser")
+        monkeypatch.setattr(Path, "group", lambda self: "testgroup")
+
+        owner, group = get_owner_group(test_file)
+        assert owner == "testuser"
+        assert group == "testgroup"
+
+    def test_mocking_win32_exception_fallback(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Advanced Mocking (Windows Exception Fallback)<br>
+        **Focus:** Verifying error handling when win32security fails unexpectedly.\n
+        ----------------------------------------------------------------------------------------------------
+        We simulate an exception raised by `win32security.GetFileSecurity` to verify the fallback.
+        """
+
+        test_file = tmp_path / "win_fallback_test.txt"
+        test_file.touch()
+
+        monkeypatch.setattr("sys.platform", "win32")
+        mock_win32 = MagicMock()
+        mock_win32.GetFileSecurity.side_effect = RuntimeError("Access Denied")
+        monkeypatch.setitem(sys.modules, "win32security", mock_win32)
+        monkeypatch.setattr(Path, "owner", lambda self: "fallback_owner")
+
+        owner, group = get_owner_group(test_file)
+        assert owner == "fallback_owner"
+        assert group is None

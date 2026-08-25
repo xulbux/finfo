@@ -62,8 +62,11 @@ class TestCategory1:
         **Focus:** Linked conditions and decision tables.\n
         ----------------------------------------------------------------------------------------------------
         `format_relative_time` has several if/elif conditions based on `delta.days`.<br>
-        We check the different branches.
+        We check all possible decision branches (including boundary values and None handling).
         """
+
+        # [0] None input:
+        assert format_relative_time(None) is None
 
         ref_time = datetime(2026, 8, 18, 12, 0, 0)
 
@@ -79,20 +82,32 @@ class TestCategory1:
         dt_past = datetime(2026, 8, 15, 8, 0, 0)
         assert format_relative_time(dt_past, reference_time=ref_time) == "at 08:00, 3 days ago"
 
-        # [4] negative days (tomorrow):
+        # [4] negative days, exactly 1 (tomorrow):
         dt_tomorrow = datetime(2026, 8, 19, 10, 0, 0)
         assert format_relative_time(dt_tomorrow, reference_time=ref_time) == "at 10:00, tomorrow"
+
+        # [5] negative days, > 1 (in future):
+        dt_future = datetime(2026, 8, 23, 12, 0, 0)
+        assert format_relative_time(dt_future, reference_time=ref_time) == "at 12:00, in 5 days"
 
     def test_collections_lists(self, tmp_path: Path) -> None:
         """
         **Topic:** Collections & Lists<br>
         **Focus:** Testing arrays/lists (here: directory tree walking).\n
         ----------------------------------------------------------------------------------------------------
-        We build a nested folder structure with files.<br>
-        `get_folder_info` iterates through this and aggregates metadata.
+        We test both an empty directory structure and a multi-level nested folder structure.
         """
 
-        # tmp_path/
+        # 1. Empty folder edge case (0 files, 0 subfolders, depth 0):
+        empty_dir = tmp_path / "empty_folder"
+        empty_dir.mkdir()
+        empty_info = get_folder_info(empty_dir)
+        assert empty_info["file_count"] == 0
+        assert empty_info["sub_folder_count"] == 0
+        assert empty_info["max_depth"] == 0
+
+        # 2. Nested folder structure:
+        # nested/
         # ├─ file1.txt
         # ├─ sub1/
         # │  ├─ file2.txt
@@ -100,22 +115,23 @@ class TestCategory1:
         # └─ sub2/
         #    └─ sub3/
         #       └─ file4.txt
+        nested_dir = tmp_path / "nested"
+        nested_dir.mkdir()
+        (nested_dir / "file1.txt").touch()
 
-        (tmp_path / "file1.txt").touch()
-
-        sub1 = tmp_path / "sub1"
+        sub1 = nested_dir / "sub1"
         sub1.mkdir()
         (sub1 / "file2.txt").touch()
         (sub1 / "file3.txt").touch()
 
-        sub2 = tmp_path / "sub2"
+        sub2 = nested_dir / "sub2"
         sub2.mkdir()
 
         sub3 = sub2 / "sub3"
         sub3.mkdir()
         (sub3 / "file4.txt").touch()
 
-        info = get_folder_info(tmp_path)
+        info = get_folder_info(nested_dir)
 
         # 4 files:
         assert info["file_count"] == 4

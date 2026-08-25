@@ -35,7 +35,40 @@ class TestCategory3:
         high_entropy_file.write_bytes(random_bytes)
 
         result_high = get_entropy_info(high_entropy_file)
-        # The intentional bug in the code should trigger here.
-        # The code incorrectly always returns `False` or calculates wrongly:
         assert result_high["entropy"] > 7.5
         assert result_high["is_encrypted_or_compressed"] is True
+
+    def test_get_entropy_empty_and_missing_file(self, tmp_path: Path) -> None:
+        """
+        **Topic:** Entropy Edge Cases (Empty & Missing Files)<br>
+        **Focus:** Testing boundary condition of zero bytes and missing files.\n
+        ----------------------------------------------------------------------------------------------------
+        Empty files or non-existent files must not crash and should return 0.0 entropy.
+        """
+
+        # 1. Empty file (0 bytes):
+        empty_file = tmp_path / "empty.bin"
+        empty_file.touch()
+        result_empty = get_entropy_info(empty_file)
+        assert result_empty["entropy"] == pytest.approx(0.0)
+        assert result_empty["is_encrypted_or_compressed"] is False
+
+        # 2. Missing file (OSError):
+        missing_file = tmp_path / "does_not_exist.bin"
+        result_missing = get_entropy_info(missing_file)
+        assert result_missing["entropy"] == pytest.approx(0.0)
+        assert result_missing["is_encrypted_or_compressed"] is False
+
+    def test_get_entropy_natural_text(self, tmp_path: Path) -> None:
+        """
+        **Topic:** Entropy for Natural Language Text<br>
+        **Focus:** Verifying mid-range entropy for ordinary text files.\n
+        ----------------------------------------------------------------------------------------------------
+        Normal text has an entropy between 3.5 and 5.0 (neither 0 nor > 7.5).
+        """
+
+        text_file = tmp_path / "prose.txt"
+        text_file.write_text("The quick brown fox jumps over the lazy dog. Testing software and applications.")
+        result_text = get_entropy_info(text_file)
+        assert 3.0 < result_text["entropy"] < 6.0
+        assert result_text["is_encrypted_or_compressed"] is False
