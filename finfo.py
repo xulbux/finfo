@@ -87,6 +87,7 @@ if __name__ == "__main__":
         subtitle="Quickly retrieve and inspect detailed information for files/folders",
         controls=[("Ctrl+C", "Cancel and exit")],
     )
+
     args.add_arg("path", required=False, help="Path to the file or folder to analyze")
 
     global ARGS
