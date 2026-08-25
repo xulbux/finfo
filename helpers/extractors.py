@@ -55,19 +55,19 @@ def get_owner_group(path: Path) -> tuple[str | None, str | None]:
                 str(path), win32security.OWNER_SECURITY_INFORMATION | win32security.GROUP_SECURITY_INFORMATION
             )
             owner_sid = sd.GetSecurityDescriptorOwner()
-            group_sid = sd.GetSecurityDescriptorGroup()  # type: ignore
+            group_sid = sd.GetSecurityDescriptorGroup()  # type:ignore
             owner_name, owner_domain, _ = win32security.LookupAccountSid(None, cast("Any", owner_sid))
             group_name, group_domain, _ = win32security.LookupAccountSid(None, cast("Any", group_sid))
             owner = f"{owner_domain}\\{owner_name}"
             group = f"{group_domain}\\{group_name}"
         except Exception:
             with contextlib.suppress(Exception):
-                owner = cast("str", path.owner())  # type: ignore
+                owner = cast("str", path.owner())  # type:ignore
     else:
         with contextlib.suppress(Exception):
-            owner = cast("str", path.owner())  # type: ignore
+            owner = cast("str", path.owner())  # type:ignore
         with contextlib.suppress(Exception):
-            group = cast("str", path.group())  # type: ignore
+            group = cast("str", path.group())  # type:ignore
 
     return owner, group
 
@@ -221,7 +221,7 @@ def get_document_info(path: Path) -> DocumentFileInfo:
             doc: Any = fitz.open(path)
             page_count = int(doc.page_count)
             if getattr(doc, "metadata", None):
-                author = doc.metadata.get("author")  # type: ignore
+                author = doc.metadata.get("author")  # type:ignore
 
             words = 0
             for page in doc:
@@ -500,7 +500,7 @@ def get_archive_info(path: Path) -> ArchiveFileInfo:
 def get_entropy_info(path: Path) -> EntropyFileInfo:
     """Calculates the Shannon entropy of a file.\n
     ------------------------------------------------------------------------------------------
-    `is_encrypted_or_compressed` always returns `False` as an intentional bug for TDD."""
+    Determines whether a file is likely compressed or encrypted (entropy > 7.5)."""
 
     entropy: float = 0.0
 
@@ -514,5 +514,5 @@ def get_entropy_info(path: Path) -> EntropyFileInfo:
 
     return {
         "entropy": entropy,
-        "is_encrypted_or_compressed": False,  # Hardcoded to `False` for TDD purposes.
+        "is_encrypted_or_compressed": entropy > 7.5,
     }
