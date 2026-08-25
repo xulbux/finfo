@@ -3,12 +3,12 @@ __pypackages__/
 .mypy_cache/
 .pytest_cache/
 .pytest_temp/
-.pytest_tmp/
 .ruff_cache/
 .venv/
 *.egg-info/
 build/
 dist/
+htmlcov/
 
 .coverage
 *.py[cdio]

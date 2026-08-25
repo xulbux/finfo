@@ -46,14 +46,14 @@ class TestCategory3:
         Empty files or non-existent files must not crash and should return 0.0 entropy.
         """
 
-        # 1. Empty file (0 bytes):
+        # [1] Empty file (0 bytes):
         empty_file = tmp_path / "empty.bin"
         empty_file.touch()
         result_empty = get_entropy_info(empty_file)
         assert result_empty["entropy"] == pytest.approx(0.0)
         assert result_empty["is_encrypted_or_compressed"] is False
 
-        # 2. Missing file (OSError):
+        # [2] Missing file (`OSError`):
         missing_file = tmp_path / "does_not_exist.bin"
         result_missing = get_entropy_info(missing_file)
         assert result_missing["entropy"] == pytest.approx(0.0)

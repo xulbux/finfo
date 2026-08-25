@@ -46,7 +46,7 @@ class TestCategory2:
         test_file = tmp_path / "mock_test.txt"
         test_file.touch()
 
-        # [1] We pretend that we are on Windows (win32):
+        # [1] We pretend that we are on Windows (`win32`):
         monkeypatch.setattr("sys.platform", "win32")
 
         # [2] We mock the `win32security` module completely (bc missing on Linux/Mac):
@@ -79,8 +79,8 @@ class TestCategory2:
         test_file.touch()
 
         monkeypatch.setattr("sys.platform", "linux")
-        monkeypatch.setattr(Path, "owner", lambda self: "testuser")
-        monkeypatch.setattr(Path, "group", lambda self: "testgroup")
+        monkeypatch.setattr(Path, "owner", lambda self: "testuser")  # pyright:ignore[reportUnknownArgumentType,reportUnknownLambdaType]
+        monkeypatch.setattr(Path, "group", lambda self: "testgroup")  # pyright:ignore[reportUnknownArgumentType,reportUnknownLambdaType]
 
         owner, group = get_owner_group(test_file)
         assert owner == "testuser"
@@ -101,7 +101,7 @@ class TestCategory2:
         mock_win32 = MagicMock()
         mock_win32.GetFileSecurity.side_effect = RuntimeError("Access Denied")
         monkeypatch.setitem(sys.modules, "win32security", mock_win32)
-        monkeypatch.setattr(Path, "owner", lambda self: "fallback_owner")
+        monkeypatch.setattr(Path, "owner", lambda self: "fallback_owner")  # pyright:ignore[reportUnknownArgumentType,reportUnknownLambdaType]
 
         owner, group = get_owner_group(test_file)
         assert owner == "fallback_owner"

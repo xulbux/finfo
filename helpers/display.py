@@ -43,7 +43,7 @@ def display_info(info_dict: Mapping[str, Any], title: str = "Info"):
 
             if isinstance(v, dict) or (hasattr(v, "items") and callable(v.items)):
                 print(f"{pad}{key_name}:")
-                print_dict(v, indent + 2)  # type:ignore
+                print_dict(v, indent + 2)  # pyright:ignore[reportUnknownArgumentType]
             elif isinstance(v, datetime):
                 # The prompt asked for "Created at hh:mm, X days ago"
                 # Since the key itself says 'Created At', it will render as 'Created At: at 14:30, 2 days ago'

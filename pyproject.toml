@@ -46,14 +46,14 @@ exclude = [
   "**/__pycache__",
   ".github",
   ".pytest_cache",
-  ".pytest_tmp",
+  ".pytest_temp",
   ".ruff_cache",
   ".venv",
   "build",
 ]
 
 [tool.pytest.ini_options]
-addopts = "--basetemp=.pytest_temp --cov=helpers --cov=finfo --cov-report=term-missing -ra"
+addopts = "--cov=helpers --cov=finfo --cov-report=term-missing -ra"
 minversion = "7.0"
 pythonpath = ["."]
 testpaths = ["tests"]

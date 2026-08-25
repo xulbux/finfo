@@ -25,12 +25,20 @@ from PIL import Image
 
 
 class TestExtractors:
-    """Comprehensive tests for all extractor helper functions in helpers/extractors.py."""
+    """
+    **LB1:** Unit Test Extractors<br>
+    **Topics:** File and Folder Extractors, Format Parsers
+    """
 
-    # ----------------------------------------------------------------------------------
-    # 1. Permissions & General Info
-    # ----------------------------------------------------------------------------------
+    # ********************************** [1] Permissions & General Info **********************************
+
     def test_get_permissions_file_and_dir(self, tmp_path: Path) -> None:
+        """
+        **Topic:** Permissions Extractor<br>
+        **Focus:** Testing permissions formatting for files and directories.
+        ----------------------------------------------------------------------------------------------------
+        We verify that numeric and symbolic permissions are correctly identified.
+        """
         file_path = tmp_path / "sample.txt"
         file_path.touch()
         file_perm = get_permissions(file_path)
@@ -41,6 +49,12 @@ class TestExtractors:
         assert dir_perm["symbolic"].startswith("d")
 
     def test_get_general_info_regular_and_hidden(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** General Info Extractor<br>
+        **Focus:** Testing general file info and hidden status cross-platform.
+        ----------------------------------------------------------------------------------------------------
+        We verify size, dates, and fallback logic for hidden files on POSIX and Win32.
+        """
         test_file = tmp_path / "regular.txt"
         test_file.write_text("General info content")
 
@@ -66,7 +80,7 @@ class TestExtractors:
         mock_stat.st_size = 1000
         mock_stat.st_blocks = 8
         mock_stat.st_mode = 0o100644
-        monkeypatch.setattr(Path, "stat", lambda self: mock_stat)  # type:ignore[reportUnknownArgumentType]
+        monkeypatch.setattr(Path, "stat", lambda self: mock_stat)  # pyright:ignore[reportUnknownArgumentType,reportUnknownLambdaType]
         posix_blocks_info = get_general_info(test_file)
         assert posix_blocks_info["disk_usage"] == 4096
 
@@ -84,7 +98,14 @@ class TestExtractors:
         assert win_err_info["is_hidden"] is False
 
     def test_get_folder_info_permission_error(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-        def mock_walk(path: str):
+        """
+        **Topic:** Folder Info Extractor Error Handling<br>
+        **Focus:** Testing `get_folder_info` when access is denied.
+        ----------------------------------------------------------------------------------------------------
+        We mock `os.walk` to throw a `PermissionError` and verify graceful failure.
+        """
+
+        def mock_walk(*args: object, **kwargs: object) -> None:
             raise PermissionError("Access denied")
 
         monkeypatch.setattr("os.walk", mock_walk)
@@ -92,11 +113,17 @@ class TestExtractors:
         assert info["file_count"] == 0
         assert info["sub_folder_count"] == 0
         assert info["max_depth"] == 0
+        monkeypatch.undo()
 
-    # ----------------------------------------------------------------------------------
-    # 2. Text Info
-    # ----------------------------------------------------------------------------------
+    # ****************************************** [2] Text Info *******************************************
+
     def test_get_text_info_syntax_and_encoding(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Text Info Extractor<br>
+        **Focus:** Testing syntax highlighting mapping and encoding detection.
+        ----------------------------------------------------------------------------------------------------
+        We test multiple extensions for correct language and verify fallback encoding.
+        """
         syntax_extensions = {
             ".py": "Python",
             ".js": "JavaScript",
@@ -141,10 +168,15 @@ class TestExtractors:
         missing_file = tmp_path / "missing_text.txt"
         assert get_text_info(missing_file)["line_count"] == 0
 
-    # ----------------------------------------------------------------------------------
-    # 3. Document Info (PDF)
-    # ----------------------------------------------------------------------------------
+    # ************************************* [3] Document Info (PDF) **************************************
+
     def test_get_document_info_pdf_and_non_pdf(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Document Info Extractor<br>
+        **Focus:** Testing PDF metadata extraction using PyMuPDF.
+        ----------------------------------------------------------------------------------------------------
+        We verify page count, word count, author extraction, and corrupted file handling.
+        """
         # Non-PDF:
         txt_file = tmp_path / "doc.txt"
         txt_file.touch()
@@ -187,10 +219,15 @@ class TestExtractors:
         err_pdf_info = get_document_info(pdf_file)
         assert err_pdf_info == {"page_count": None, "word_count": None, "author": None}
 
-    # ----------------------------------------------------------------------------------
-    # 4. Executable Info (PE)
-    # ----------------------------------------------------------------------------------
+    # ************************************* [4] Executable Info (PE) *************************************
+
     def test_get_executable_info_architectures(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Executable Info Extractor<br>
+        **Focus:** Testing PE file architecture parsing.
+        ----------------------------------------------------------------------------------------------------
+        We mock `pefile` to simulate various CPU architectures and bitness values.
+        """
         exe_file = tmp_path / "app.exe"
         exe_file.touch()
 
@@ -230,10 +267,15 @@ class TestExtractors:
         monkeypatch.setitem(sys.modules, "pefile", mock_pefile)
         assert get_executable_info(exe_file) == {"architecture": None, "bitness": None, "is_signed": None}
 
-    # ----------------------------------------------------------------------------------
-    # 5. Media Info (Image, Audio, Video)
-    # ----------------------------------------------------------------------------------
+    # ******************************* [5] Media Info (Image, Audio, Video) *******************************
+
     def test_get_media_info_image_modes_and_exif(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Image Info Extractor<br>
+        **Focus:** Testing image modes, resolution, and EXIF parsing.
+        ----------------------------------------------------------------------------------------------------
+        We verify different color modes (RGB, CMYK, etc.) and specific EXIF tag lookups.
+        """
         modes = ["1", "L", "P", "RGB", "RGBA"]
         for mode in modes:
             img_path = tmp_path / f"img_{mode}.png"
@@ -288,6 +330,12 @@ class TestExtractors:
         assert "resolution" not in err_res
 
     def test_get_media_info_mutagen_channel_variations(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Audio Info Extractor<br>
+        **Focus:** Testing mutagen channel identification and audio tags.
+        ----------------------------------------------------------------------------------------------------
+        We verify mono/stereo identification and exception handling for invalid audio.
+        """
         audio_file = tmp_path / "test_channels.mp3"
         audio_file.touch()
 
@@ -320,6 +368,12 @@ class TestExtractors:
         assert "audio_info" not in err_res
 
     def test_get_media_info_pymediainfo_track_variations(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** Video/Media Info Extractor<br>
+        **Focus:** Testing video and audio track analysis via MediaInfo.
+        ----------------------------------------------------------------------------------------------------
+        We verify codec extraction, channels, bit depth, and general parsing logic.
+        """
         media_file = tmp_path / "video.mp4"
         media_file.touch()
 
@@ -359,10 +413,15 @@ class TestExtractors:
         _get_pymediainfo_info(media_file, err_res)
         assert "video_codec" not in err_res
 
-    # ----------------------------------------------------------------------------------
-    # 6. Archive Info (ZIP & TAR methods)
-    # ----------------------------------------------------------------------------------
+    # ******************************* [6] Archive Info (ZIP & TAR methods) *******************************
+
     def test_get_archive_info_zip_methods(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** ZIP Archive Extractor<br>
+        **Focus:** Testing ZIP compression method mapping and ratios.
+        ----------------------------------------------------------------------------------------------------
+        We mock `zipfile` to simulate DEFLATED, LZMA, and BZIP2 compression.
+        """
         zip_path = tmp_path / "archive.zip"
         zip_path.touch()
 
@@ -403,6 +462,12 @@ class TestExtractors:
         assert "compression_type" not in err_res
 
     def test_get_archive_info_tar_compression_extensions(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        """
+        **Topic:** TAR Archive Extractor<br>
+        **Focus:** Testing TAR format mapping based on extension types.
+        ----------------------------------------------------------------------------------------------------
+        We verify that gzip, bzip2, xz, and uncompressed tarballs are correctly identified.
+        """
         tar_extensions = [
             (".tar.gz", "GZIP"),
             (".tar.bz2", "BZIP2"),
@@ -436,3 +501,137 @@ class TestExtractors:
         err_res: dict[str, object] = {}
         _get_tar_info(non_tar, err_res)
         assert "compression_type" not in err_res
+
+    def test_coverage_branches(self, monkeypatch, tmp_path: Path) -> None:  # pyright:ignore[reportUnknownParameterType,reportMissingParameterType]
+        """
+        **Topic:** Coverage Edge Cases<br>
+        **Focus:** Testing branches to reach 100% coverage.
+        ----------------------------------------------------------------------------------------------------
+        We test missing branches like empty dimensions, empty archives, and missing attributes.
+        """
+
+        # [1] `_get_image_info`: width or height == 0:
+        res = {}
+        mock_pil = MagicMock()
+        mock_img = MagicMock()
+        mock_img.width = 0
+        mock_img.height = 0
+        mock_img.mode = "RGB"
+        mock_img.getexif.return_value = {}
+        mock_pil.Image.open.return_value.__enter__.return_value = mock_img
+        monkeypatch.setitem(sys.modules, "PIL", mock_pil)  # pyright:ignore[reportUnknownMemberType]
+        monkeypatch.setitem(sys.modules, "PIL.Image", mock_pil.Image)  # pyright:ignore[reportUnknownMemberType]
+
+        _get_image_info(Path("test.png"), res)  # pyright:ignore[reportUnknownArgumentType]
+        assert res.get("aspect_ratio") is None  # pyright:ignore[reportUnknownMemberType]
+
+        # [2] `_get_mutagen_info`: lacks info, lacks tags, or sets existing:
+        mock_mutagen = MagicMock()
+
+        mock_file = MagicMock()
+        del mock_file.info
+        del mock_file.tags
+        mock_mutagen.File.return_value = mock_file
+        monkeypatch.setitem(sys.modules, "mutagen", mock_mutagen)  # pyright:ignore[reportUnknownMemberType]
+        res = {}
+        _get_mutagen_info(Path("test.mp3"), res)  # pyright:ignore[reportUnknownArgumentType]
+
+        mock_file2 = MagicMock()
+        mock_file2.info.length = 10
+        mock_file2.info.bitrate = 128
+        mock_file2.info.sample_rate = 44100
+        mock_file2.info.channels = 2
+        mock_file2.tags = {}
+        mock_mutagen.File.return_value = mock_file2
+        res2 = {"length_time": 100, "bitrate": 256, "audio_info": {"sample_rate": 0, "channels": "0"}}
+        _get_mutagen_info(Path("test2.mp3"), res2)
+        assert res2["length_time"] == 100
+
+        # Test `channels = None`:
+        mock_file3 = MagicMock()
+        mock_file3.info.channels = None
+        mock_file3.tags = {}
+        mock_mutagen.File.return_value = mock_file3
+        _get_mutagen_info(Path("test3.mp3"), {})
+
+        # [3] `_get_pymediainfo_info`: audio channels not 1, 2, 6, but `None` + existing fields:
+        mock_pmi = MagicMock()
+        mock_audio = MagicMock()
+        mock_audio.track_type = "Audio"
+        mock_audio.format = "AAC"
+        mock_audio.bit_rate = 100
+        mock_audio.sampling_rate = 44100
+        mock_audio.channel_s = None
+
+        mock_video = MagicMock()
+        mock_video.track_type = "Video"
+        mock_video.width = 100
+        mock_video.height = 100
+        mock_video.frame_rate = 30
+        mock_video.format = "H264"
+        mock_video.frame_count = 1000
+        mock_video.duration = 1000
+        mock_video.display_aspect_ratio = "1:1"
+        mock_video.bit_depth = 8
+
+        # [3.1] Video and Audio tracks when result is already populated (bypasses all ifs):
+        mock_pmi.MediaInfo.parse.return_value.tracks = [mock_audio, mock_video]
+        monkeypatch.setitem(sys.modules, "pymediainfo", mock_pmi)  # pyright:ignore[reportUnknownMemberType]
+        res3 = {
+            "resolution": {"width": 1, "height": 1},
+            "fps": 60.0,
+            "video_codec": "VP9",
+            "length_frames": 10,
+            "length_time": 10.0,
+            "aspect_ratio": "16:9",
+            "color_depth": 10,
+            "audio_codec": "MP3",
+            "bitrate": 320,
+            "audio_info": {"sample_rate": 48000, "channels": "stereo"},
+        }
+        _get_pymediainfo_info(Path("test.mp4"), res3)
+        assert res3["fps"] == pytest.approx(60.0)
+
+        # [3.2] Video and Audio tracks when result is empty, but tracks are empty (bypasses all ifs):
+        mock_audio_empty = MagicMock()
+        mock_audio_empty.track_type = "Audio"
+        mock_audio_empty.format = None
+        mock_audio_empty.bit_rate = None
+        mock_audio_empty.sampling_rate = None
+        mock_audio_empty.channel_s = None
+
+        mock_video_empty = MagicMock()
+        mock_video_empty.track_type = "Video"
+        mock_video_empty.width = None
+        mock_video_empty.height = None
+        mock_video_empty.frame_rate = None
+        mock_video_empty.format = None
+        mock_video_empty.frame_count = None
+        mock_video_empty.duration = None
+        mock_video_empty.display_aspect_ratio = None
+        mock_video_empty.bit_depth = None
+
+        mock_pmi.MediaInfo.parse.return_value.tracks = [mock_audio_empty, mock_video_empty]
+        res_empty = {}
+        _get_pymediainfo_info(Path("test2.mp4"), res_empty)  # pyright:ignore[reportUnknownArgumentType]
+        assert "fps" not in res_empty
+
+        # [4] `_get_zip_info`: empty files (`uncompressed_size = 0`) and unknown compression:
+
+        mock_zipfile = MagicMock()
+        mock_zipfile.is_zipfile.return_value = True
+
+        mock_info = MagicMock()
+        mock_info.compress_type = 9999  # Unknown
+        mock_info.file_size = 0
+        mock_info.compress_size = 0
+
+        mock_zip = MagicMock()
+        mock_zip.infolist.return_value = [mock_info]
+        mock_zipfile.ZipFile.return_value.__enter__.return_value = mock_zip
+        monkeypatch.setitem(sys.modules, "zipfile", mock_zipfile)  # pyright:ignore[reportUnknownMemberType]
+
+        res4 = {}
+        _get_zip_info(Path("test.zip"), res4)  # pyright:ignore[reportUnknownArgumentType]
+        assert res4.get("compression_ratio") is None  # pyright:ignore[reportUnknownMemberType]
+        assert "compression_type" not in res4

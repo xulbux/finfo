@@ -5,10 +5,18 @@ import pytest
 
 
 class TestDisplay:
-    """Tests for display rendering and relative time formatting in helpers/display.py."""
+    """
+    **LB1:** Unit Test – Display rendering<br>
+    **Topics:** Output Rendering, Relative Time Formatting
+    """
 
     def test_format_relative_time_default_now(self) -> None:
-        """Tests `format_relative_time` when `reference_time` is omitted (defaults to now)."""
+        """
+        **Topic:** Relative Time Formatting<br>
+        **Focus:** Testing time formatting with default reference.\n
+        ----------------------------------------------------------------------------------------------------
+        Tests `format_relative_time` when `reference_time` is omitted (defaults to now).
+        """
 
         now = datetime.now()
         result = format_relative_time(now)
@@ -16,7 +24,12 @@ class TestDisplay:
         assert "today" in result
 
     def test_display_info_flat_and_nested(self, capsys: pytest.CaptureFixture[str]) -> None:
-        """Tests `display_info` prints formatted output including nested dicts, datetimes, and ignores None."""
+        """
+        **Topic:** Output Rendering<br>
+        **Focus:** Testing formatted output of nested structures.\n
+        ----------------------------------------------------------------------------------------------------
+        Tests `display_info` prints formatted output including nested dicts, datetimes, and ignores `None`.
+        """
 
         sample_data: dict[str, Any] = {
             "name": "test.txt",

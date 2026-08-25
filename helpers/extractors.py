@@ -55,19 +55,19 @@ def get_owner_group(path: Path) -> tuple[str | None, str | None]:
                 str(path), win32security.OWNER_SECURITY_INFORMATION | win32security.GROUP_SECURITY_INFORMATION
             )
             owner_sid = sd.GetSecurityDescriptorOwner()
-            group_sid = sd.GetSecurityDescriptorGroup()  # type:ignore
+            group_sid = sd.GetSecurityDescriptorGroup()  # pyright:ignore[reportUnknownVariableType,reportUnknownMemberType,reportAttributeAccessIssue]
             owner_name, owner_domain, _ = win32security.LookupAccountSid(None, cast("Any", owner_sid))
             group_name, group_domain, _ = win32security.LookupAccountSid(None, cast("Any", group_sid))
             owner = f"{owner_domain}\\{owner_name}"
             group = f"{group_domain}\\{group_name}"
         except Exception:
             with contextlib.suppress(Exception):
-                owner = cast("str", path.owner())  # type:ignore
+                owner = cast("str", path.owner())  # pyright:ignore[reportUnknownMemberType,reportAttributeAccessIssue]
     else:
         with contextlib.suppress(Exception):
-            owner = cast("str", path.owner())  # type:ignore
+            owner = cast("str", path.owner())  # pyright:ignore[reportUnknownMemberType,reportAttributeAccessIssue]
         with contextlib.suppress(Exception):
-            group = cast("str", path.group())  # type:ignore
+            group = cast("str", path.group())  # pyright:ignore[reportUnknownMemberType,reportAttributeAccessIssue]
 
     return owner, group
 
@@ -77,7 +77,8 @@ def get_general_info(path: Path) -> GeneralInfo:
     st = path.stat()
     owner, group = get_owner_group(path)
 
-    created_at = datetime.fromtimestamp(st.st_ctime)
+    creation_ts: float = getattr(st, "st_birthtime", st.st_ctime)  # pyright: ignore[reportDeprecated]
+    created_at = datetime.fromtimestamp(creation_ts)
     updated_at = datetime.fromtimestamp(st.st_mtime)
     accessed_at = datetime.fromtimestamp(st.st_atime)
 
@@ -221,7 +222,7 @@ def get_document_info(path: Path) -> DocumentFileInfo:
             doc: Any = fitz.open(path)
             page_count = int(doc.page_count)
             if getattr(doc, "metadata", None):
-                author = doc.metadata.get("author")  # type:ignore
+                author = doc.metadata.get("author")
 
             words = 0
             for page in doc:
@@ -284,7 +285,7 @@ def _get_image_info(path: Path, result: dict[str, Any]) -> None:
                 import math
 
                 gcd = math.gcd(img_any.width, img_any.height)
-                if gcd > 0:
+                if gcd > 0:  # pragma: no branch
                     result["aspect_ratio"] = f"{img_any.width // gcd}:{img_any.height // gcd}"
 
             mode_to_depth: dict[str, int] = {

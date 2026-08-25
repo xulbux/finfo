@@ -65,7 +65,7 @@ class TestCategory1:
         We check all possible decision branches (including boundary values and None handling).
         """
 
-        # [0] None input:
+        # [0] `None` input:
         assert format_relative_time(None) is None
 
         ref_time = datetime(2026, 8, 18, 12, 0, 0)
@@ -98,7 +98,7 @@ class TestCategory1:
         We test both an empty directory structure and a multi-level nested folder structure.
         """
 
-        # 1. Empty folder edge case (0 files, 0 subfolders, depth 0):
+        # [1] Empty folder edge case (0 files, 0 subfolders, depth 0):
         empty_dir = tmp_path / "empty_folder"
         empty_dir.mkdir()
         empty_info = get_folder_info(empty_dir)
@@ -106,7 +106,7 @@ class TestCategory1:
         assert empty_info["sub_folder_count"] == 0
         assert empty_info["max_depth"] == 0
 
-        # 2. Nested folder structure:
+        # [2] Nested folder structure:
         # nested/
         # ├─ file1.txt
         # ├─ sub1/
